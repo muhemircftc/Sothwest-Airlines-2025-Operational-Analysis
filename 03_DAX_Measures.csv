@@ -1,0 +1,30 @@
+﻿TableName,MeasureName,DAXExpression
+DimDate,Cancellation Cause Chart Title," VAR Carrier =     SELECTEDVALUE(         FactFlights[CarrierCode],         ""All / Multiple Carriers""     ) VAR Origin =     SELECTEDVALUE(         FactFlights[OriginAirport],         ""All / Multiple Origins""     ) RETURN     ""Reported Cancellation Reasons | ""         & Carrier & "" | "" & Origin"
+DimDate,Delay Cause Chart Title," VAR Carrier =     SELECTEDVALUE(         FactFlights[CarrierCode],         ""All / Multiple Carriers""     ) VAR Origin =     SELECTEDVALUE(         FactFlights[OriginAirport],         ""All / Multiple Origins""     ) VAR Destination =     SELECTEDVALUE(         FactFlights[DestinationAirport],         ""All / Multiple Destinations""     ) RETURN     ""Reported Delay Causes | ""         & Carrier & "" | ""         & Origin & "" -> "" & Destination         & "" | Arrivals >=15 min"""
+DimDate,Overview Context," VAR Carrier =     SELECTEDVALUE(         FactFlights[CarrierCode],         ""All / Multiple Carriers""     ) VAR Period =     IF(         ISFILTERED(DimDate[YearMonth]),         CONCATENATEX(             VALUES(DimDate[YearMonth]),             DimDate[YearMonth],             "", "",             DimDate[YearMonth],             ASC         ),         ""All Loaded Dates""     ) RETURN     ""Airline Operational Performance | ""         & Carrier & "" | "" & Period"
+DimDate,Selected Cause Minutes 15 Plus," SWITCH(     SELECTEDVALUE(DimDelayCause[CauseCode]),     ""CARRIER"", [Carrier Delay Minutes 15 Plus],     ""LATE"", [Late Aircraft Delay Minutes 15 Plus],     ""NAS"", [NAS Delay Minutes 15 Plus],     ""WEATHER"", [Weather Delay Minutes 15 Plus],     ""SECURITY"", [Security Delay Minutes 15 Plus],     BLANK() )"
+DimDate,Station Comparison Title," VAR Carrier =     SELECTEDVALUE(         FactFlights[CarrierCode],         ""All / Multiple Carriers""     ) VAR Origin =     SELECTEDVALUE(         FactFlights[OriginAirport],         ""All / Multiple Origins""     ) RETURN     ""Monthly Arrival Delay Rate | ""         & Carrier & "" | "" & Origin         & "" vs Carrier Overall"""
+FactFlights,Arrival Minus Reported Cause Minutes,     [Total Arrival Delay Minutes 15 Plus]     - [Reported Cause Minutes 15 Plus]
+FactFlights,Arrival Minus Reported Cause Rate," DIVIDE(     [Arrival Minus Reported Cause Minutes],     [Total Arrival Delay Minutes 15 Plus] )"
+FactFlights,Avg Arrival Delay Minutes 15 Plus," CALCULATE(     AVERAGE(FactFlights[ArrivalDelayMinutes]),     FactFlights[IsArrivalDelayed15] = 1 )"
+FactFlights,Cancellation Rate," DIVIDE(     [Cancelled Flight Records],     [Flight Records] )"
+FactFlights,Cancelled Flight Records," CALCULATE(     [Flight Records],     FactFlights[IsCancelled] = 1 )"
+FactFlights,Carrier Delay Minutes 15 Plus," CALCULATE(     SUM(FactFlights[CarrierDelayMinutes]),     FactFlights[IsArrivalDelayed15] = 1 )"
+FactFlights,Carrier Overall Delay Rate," CALCULATE(     [Delayed 15 Plus Rate],     REMOVEFILTERS(FactFlights[OriginAirport]) )"
+FactFlights,Delay Minutes per Valid Arrival," DIVIDE(     [Total Arrival Delay Minutes 15 Plus],     [Valid Arrival Records] )"
+FactFlights,Delay Rate Gap pp, 100 * (     [Delayed 15 Plus Rate]     - [Carrier Overall Delay Rate] )
+FactFlights,Delayed 15 Plus Rate," DIVIDE(     [Delayed 15 Plus Records],     [Valid Arrival Records] )"
+FactFlights,Delayed 15 Plus Records," CALCULATE(     [Flight Records],     FactFlights[IsArrivalDelayed15] = 1 )"
+FactFlights,Diversion Rate," DIVIDE(     [Diverted Flight Records],     [Flight Records] )"
+FactFlights,Diverted Flight Records," CALCULATE(     [Flight Records],     FactFlights[IsDiverted] = 1 )"
+FactFlights,Flight Records, COUNTROWS(FactFlights)
+FactFlights,Flight Records Display," FORMAT([Flight Records], ""#,##0"")"
+FactFlights,Late Aircraft Delay Minutes 15 Plus," CALCULATE(     SUM(FactFlights[LateAircraftDelayMinutes]),     FactFlights[IsArrivalDelayed15] = 1 )"
+FactFlights,Missing Arrival Delay on Regular Flights," COALESCE(     CALCULATE(         COUNTROWS(FactFlights),         FactFlights[IsCancelled] = 0,         FactFlights[IsDiverted] = 0,         ISBLANK(FactFlights[ArrivalDelayMinutes])     ),     0 )"
+FactFlights,Nas Delay Minutes 15 Plus," CALCULATE(     SUM(FactFlights[NasDelayMinutes]),     FactFlights[IsArrivalDelayed15] = 1 )"
+FactFlights,Reported Cause Coverage Rate," DIVIDE(     [Reported Cause Minutes 15 Plus],     [Total Arrival Delay Minutes 15 Plus] )"
+FactFlights,Reported Cause Minutes 15 Plus,     [Carrier Delay Minutes 15 Plus]     + [Weather Delay Minutes 15 Plus]     + [NAS Delay Minutes 15 Plus]     + [Security Delay Minutes 15 Plus]     + [Late Aircraft Delay Minutes 15 Plus]
+FactFlights,Security Delay Minutes 15 Plus," CALCULATE(     SUM(FactFlights[SecurityDelayMinutes]),     FactFlights[IsArrivalDelayed15] = 1 )"
+FactFlights,Total Arrival Delay Minutes 15 Plus," CALCULATE(     SUM(FactFlights[ArrivalDelayMinutes]),     FactFlights[IsArrivalDelayed15] = 1 )"
+FactFlights,Valid Arrival Records, COUNT(FactFlights[ArrivalDelayMinutes])
+FactFlights,Weather Delay Minutes 15 Plus," CALCULATE(     SUM(FactFlights[WeatherDelayMinutes]),     FactFlights[IsArrivalDelayed15] = 1 )"
