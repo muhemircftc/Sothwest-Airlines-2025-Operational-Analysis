@@ -1,6 +1,6 @@
 # Airline Operational Performance | 2025
 
-SQL Server and Power BI portfolio project for airline operational reliability analysis and investigation prioritization. Source: US domestic BTS Reporting Carrier On-Time Performance; focus carrier: Southwest (WN). This is not SunExpress internal data and is not a production deployment.
+SQL Server and Power BI portfolio project for airline operational reliability analysis and investigation prioritization. Source: US domestic BTS Reporting Carrier On-Time Performance; focus carrier: Southwest (WN). 
 
 ## Start here
 - Read Business_Analysis_Report.pdf for the business problem, findings and proposed actions.
